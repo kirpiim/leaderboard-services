@@ -17,22 +17,21 @@ public class LeaderboardServiceApplication {
     }
 
     @Bean
-    CommandLineRunner demo(UserRepository userRepo, ScoreRepository scoreRepo) {
+    CommandLineRunner demo(UserRepository userRepository, ScoreRepository scoreRepository) {
         return args -> {
-            User u = new User();
-            u.setUsername("testuser");
-            u.setEmail("test@example.com");
-            u.setPassword("password"); // plain for now; will hash later
-            userRepo.save(u);
-
-            Score s = new Score();
-            s.setUser(u);
-            s.setPoints(123);
-            scoreRepo.save(s);
-
-            System.out.println("Saved user id = " + u.getId());
-            System.out.println("Score count = " + scoreRepo.count());
+            userRepository.findByEmail("test@example.com").ifPresentOrElse(
+                    existing -> System.out.println("User already exists: " + existing.getEmail()),
+                    () -> {
+                        var user = new User();
+                        user.setUsername("testuser");
+                        user.setEmail("test@example.com");
+                        user.setPassword("password");
+                        userRepository.save(user);
+                        System.out.println("Inserted demo user");
+                    }
+            );
         };
     }
+
 }
 
