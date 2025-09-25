@@ -7,5 +7,8 @@ import java.util.List;
 
 public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Score> findAllByOrderByPointsDescTimestampAsc(Pageable pageable);
+
+    // Delete all scores by user ID
+    void deleteAllByUserId(Long userId);
 }
 
