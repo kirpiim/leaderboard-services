@@ -36,3 +36,12 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# OS
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
