@@ -4,25 +4,27 @@ import com.example.leaderboardservice.dto.AuthResponse;
 import com.example.leaderboardservice.dto.LoginRequest;
 import com.example.leaderboardservice.dto.RegisterRequest;
 import com.example.leaderboardservice.models.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.example.leaderboardservice.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil; //  NEW
 
     @Autowired
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil; //  Inject JwtUtil
     }
 
     // Register method using RegisterRequest
@@ -54,9 +56,11 @@ public class AuthService {
             return new AuthResponse(false, "Invalid password");
         }
 
-        return new AuthResponse(true, "Login successful");
+        //  Generate JWT
+        String token = jwtUtil.generateToken(user.getUsername());
+
+
+        //  Return token instead of just message
+        return new AuthResponse(true, token);
     }
 }
-
-
-
