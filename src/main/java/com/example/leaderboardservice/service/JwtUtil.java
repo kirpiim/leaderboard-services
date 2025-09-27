@@ -12,27 +12,22 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-
-    private final Key secretKey;
+    // At least 32 characters for HS256
+    private static final String SECRET_KEY = "mysecretkeymysecretkeymysecretkey12345";
     private static final long EXPIRATION = 1000 * 60 * 60; // 1 hour
-
-    // Inject from application.properties (fallback to default if not set)
-    public JwtUtil(@Value("${jwt.secret:mysecretkey1234567890}") String secret) {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-    }
 
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
+                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
@@ -44,12 +39,13 @@ public class JwtUtil {
     }
 
     private boolean isTokenExpired(String token) {
-        Date expiration = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
+        return Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .getExpiration();
-        return expiration.before(new Date());
+                .getExpiration()
+                .before(new Date());
     }
 }
+
