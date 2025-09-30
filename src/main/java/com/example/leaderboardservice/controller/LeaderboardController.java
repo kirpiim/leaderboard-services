@@ -1,5 +1,6 @@
 package com.example.leaderboardservice.controller;
 
+import com.example.leaderboardservice.dto.LeaderboardEntry;
 import com.example.leaderboardservice.models.Score;
 import com.example.leaderboardservice.models.User;
 import com.example.leaderboardservice.repositories.ScoreRepository;
@@ -31,8 +32,7 @@ public class LeaderboardController {
         this.jwtUtil = jwtUtil;
     }
 
-
-    // POST /scores → save score for logged-in user
+    // POST /leaderboard/scores → save score for logged-in user
     @PostMapping("/scores")
     public ResponseEntity<?> submitScore(@RequestParam long points) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -50,10 +50,19 @@ public class LeaderboardController {
         return ResponseEntity.ok("Score saved successfully!");
     }
 
-    // GET /leaderboard?limit=N → return top N scores
+    // GET /leaderboard?limit=N → return top N scores (only username, points, timestamp)
     @GetMapping
-    public ResponseEntity<List<Score>> getLeaderboard(@RequestParam(defaultValue = "10") int limit) {
+    public ResponseEntity<List<LeaderboardEntry>> getLeaderboard(@RequestParam(defaultValue = "10") int limit) {
         List<Score> scores = scoreRepository.findAllByOrderByPointsDescTimestampAsc(PageRequest.of(0, limit));
-        return ResponseEntity.ok(scores);
+
+        List<LeaderboardEntry> leaderboard = scores.stream()
+                .map(score -> new LeaderboardEntry(
+                        score.getUser().getUsername(),
+                        score.getPoints(),
+                        score.getTimestamp()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(leaderboard);
     }
 }
