@@ -16,7 +16,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil; //  NEW
+    private final JwtUtil jwtUtil;
 
     @Autowired
     public AuthService(UserRepository userRepository,
@@ -24,43 +24,36 @@ public class AuthService {
                        JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtUtil = jwtUtil; //  Inject JwtUtil
+        this.jwtUtil = jwtUtil;
     }
 
-    // Register method using RegisterRequest
     public AuthResponse register(RegisterRequest request) {
-        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
-        if (existingUser.isPresent()) {
-            return new AuthResponse(false, "Email already registered");
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            return new AuthResponse(false, "Email already registered", null);
         }
 
         User user = new User();
         user.setEmail(request.getEmail());
-        // Encode the password
+        user.setUsername(request.getUsername()); //  save username
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+
         userRepository.save(user);
 
-        return new AuthResponse(true, "User registered successfully");
+        return new AuthResponse(true, "User registered successfully", null);
     }
 
-    // Login method using LoginRequest
     public AuthResponse login(LoginRequest request) {
-        Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
-        if (optionalUser.isEmpty()) {
-            return new AuthResponse(false, "User not found");
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            return new AuthResponse(false, "Invalid password", null);
         }
 
-        User user = optionalUser.get();
-        boolean matches = passwordEncoder.matches(request.getPassword(), user.getPassword());
-        if (!matches) {
-            return new AuthResponse(false, "Invalid password");
-        }
+        //  include email (or both email + username) in token
+        String token = jwtUtil.generateToken(user.getEmail());
 
-        //  Generate JWT
-        String token = jwtUtil.generateToken(user.getUsername());
-
-
-        //  Return token instead of just message
-        return new AuthResponse(true, token);
+        return new AuthResponse(true, "Login successful", token);
     }
 }
+
