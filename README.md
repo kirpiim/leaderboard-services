@@ -145,8 +145,18 @@ curl -X GET "http://localhost:8080/leaderboard?limit=5" \
 -Maven
 
 
+## Error Handling
+
+This service includes a global exception handler using `@ControllerAdvice`.  
+It ensures all errors return clean JSON responses instead of raw stack traces.  
+Examples:
+
+- Invalid credentials → `401 Unauthorized` with `{ "error": "Invalid credentials" }`
+- Validation errors (e.g., blank username, invalid email) → `400 Bad Request` with field-specific messages
+- General runtime issues → `400 Bad Request` with an error message
+
+
 ## Future Improvements
 
 -Unit tests with JUnit + Spring Boot Test.
--Global error handling with @ControllerAdvice.
 -Docker Compose for DB + service.
