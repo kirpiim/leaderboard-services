@@ -6,10 +6,11 @@ import com.example.leaderboardservice.dto.RegisterRequest;
 import com.example.leaderboardservice.models.User;
 import com.example.leaderboardservice.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AuthService {
@@ -29,12 +30,14 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return new AuthResponse(false, "Email already registered", null);
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Email already registered"
+            );
         }
 
         User user = new User();
         user.setEmail(request.getEmail());
-        user.setUsername(request.getUsername()); //  save username
+        user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         userRepository.save(user);
@@ -44,16 +47,14 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            return new AuthResponse(false, "Invalid password", null);
+            throw new BadCredentialsException("Invalid credentials");
         }
 
-        //  include email (or both email + username) in token
         String token = jwtUtil.generateToken(user.getEmail());
 
         return new AuthResponse(true, "Login successful", token);
     }
 }
-
