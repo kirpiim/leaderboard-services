@@ -1,5 +1,6 @@
 package com.example.leaderboardservice.config;
 
+import com.example.leaderboardservice.security.CustomAuthEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,9 +16,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+    private final CustomAuthEntryPoint customAuthEntryPoint;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter,
+                          CustomAuthEntryPoint customAuthEntryPoint) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.customAuthEntryPoint = customAuthEntryPoint;
     }
 
     @Bean
@@ -31,7 +35,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomAuthEntryPoint authEntryPoint) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -40,8 +44,10 @@ public class SecurityConfig {
                         .requestMatchers("/scores/**", "/leaderboard/**").authenticated()
                         .anyRequest().permitAll()
                 )
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(authEntryPoint)) // 👈 important
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 }
