@@ -1,6 +1,6 @@
 package com.example.leaderboardservice.controller;
 
-import com.example.leaderboardservice.dto.LeaderboardEntry;
+import com.example.leaderboardservice.models.LeaderboardEntry;
 import com.example.leaderboardservice.models.Score;
 import com.example.leaderboardservice.models.User;
 import com.example.leaderboardservice.repositories.ScoreRepository;
