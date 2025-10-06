@@ -4,22 +4,19 @@ A Spring Boot microservice that provides **user authentication** and a **score l
 Built with: **Spring Boot**, **Spring Security (JWT)**, **Spring Data JPA**, and **PostgreSQL** (or H2 for local testing).
 
 ---
+## Overview
+This project implements a backend service for managing users and scores in a game leaderboard system.  
+It demonstrates secure authentication, database persistence, and RESTful API development using Java Spring Boot.
 
+---
 ##  Features
 
-- **User Authentication**
-    - Register new users (`/auth/register`) with BCrypt-hashed passwords.
-    - Login (`/auth/login`) to receive a JWT token.
-- **JWT Security**
-    - Protects score submission and leaderboard endpoints.
-- **Leaderboard**
-    - Submit scores (authenticated).
-    - Fetch the top N scores (username, points, timestamp).
-- **DTO Responses**
-    - Clean JSON instead of raw entities.
-- **Database Support**
-    - PostgreSQL for production.
-    - H2 (in-memory) for easy local testing.
+- User registration and login with BCrypt password encryption  
+- JWT-based authentication for secure endpoints  
+- Leaderboard API for submitting and fetching scores  
+- Global exception handling for clean JSON error responses  
+- PostgreSQL database integration (H2 for local testing)  
+- DTO responses for clean output  
 
 ---
 
@@ -137,12 +134,12 @@ curl -X GET "http://localhost:8080/leaderboard?limit=5" \
 
 ## Tech Stack
 
--Java 17
--Spring Boot
--Spring Security (JWT)
--Spring Data JPA
--PostgreSQL / H2
--Maven
+- Java 17
+- Spring Boot
+- Spring Security (JWT)
+- Spring Data JPA
+- PostgreSQL / H2
+- Maven
 
 
 ## Error Handling
@@ -155,8 +152,21 @@ Examples:
 - Validation errors (e.g., blank username, invalid email) → `400 Bad Request` with field-specific messages
 - General runtime issues → `400 Bad Request` with an error message
 
+## Continuous Integration(CI)
+Automated build and test pipeline using **GitHub Actions**.  
+Every push and pull request triggers unit tests and code validation.
+
+## What I learned
+- Built a modular Spring Boot backend with controller–service–repository structure
+- Implemented secure JWT authentication with BCrypt password hashing
+- Integrated MySQL/PostgreSQL via Spring Data JPA
+- Tested REST APIs using Postman
+- Configured multi-environment setups through application.properties
+- Applied centralized error handling with @ControllerAdvice
+- Set up automated CI/CD with GitHub Actions
+- Wrote clean, scalable code following best practices
 
 ## Future Improvements
 
--Unit tests with JUnit + Spring Boot Test.
--Docker Compose for DB + service.
+- Unit tests with JUnit + Spring Boot Test.
+- Docker Compose for DB + service.
